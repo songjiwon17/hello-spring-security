@@ -1,9 +1,11 @@
 package kr.ac.hansung.controller;
 
 import kr.ac.hansung.dto.ProductDto;
+import kr.ac.hansung.entity.Product;
 import kr.ac.hansung.service.ProductService;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -21,8 +23,18 @@ public class ProductController {
 
     // 페이징 화면 처리(상품 5개씩, id기준으로 정렬해서 보여지도록)
     @GetMapping
-    public String list(@PageableDefault(size = 5, sort = "id", direction = Sort.Direction.ASC) Pageable pageable,Model model) {
-        model.addAttribute("productPage", productService.getProducts(pageable));
+    public String list(
+            @RequestParam(required = false) String keyword,
+            @PageableDefault(size = 5, sort = "id", direction = Sort.Direction.ASC) Pageable pageable,
+            Model model) {
+
+        // 서비스에 keyword와 pageable을 함께 넘기기
+        Page<Product> productPage = productService.getProducts(keyword, pageable);
+
+        // 결과 모델에 담기
+        model.addAttribute("productPage", productPage);
+        model.addAttribute("keyword", keyword);
+
         return "products/list";
     }
 

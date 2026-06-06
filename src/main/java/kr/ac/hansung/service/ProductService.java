@@ -22,8 +22,12 @@ public class ProductService {
 
     // 페이징하기 위한 getProducts 메서드
     @Transactional(readOnly = true)
-    public Page<Product> getProducts(Pageable pageable){
-        return productRepository.findAll(pageable);
+    public Page<Product> getProducts(String keyword, Pageable pageable){
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return productRepository.findAll(pageable);
+        }
+        // 검색어가 있으면 이름에 포함된 상품만 검색해서 반환
+        return productRepository.findByNameContaining(keyword, pageable);
     }
 
     @Transactional(readOnly = true)
