@@ -3,6 +3,11 @@ package kr.ac.hansung.controller;
 import kr.ac.hansung.dto.ProductDto;
 import kr.ac.hansung.service.ProductService;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -14,9 +19,10 @@ public class ProductController {
 
     private final ProductService productService;
 
+    // 페이징 화면 처리(상품 5개씩, id기준으로 정렬해서 보여지도록)
     @GetMapping
-    public String list(Model model) {
-        model.addAttribute("products", productService.findAll());
+    public String list(@PageableDefault(size = 5, sort = "id", direction = Sort.Direction.ASC) Pageable pageable,Model model) {
+        model.addAttribute("productPage", productService.getProducts(pageable));
         return "products/list";
     }
 
