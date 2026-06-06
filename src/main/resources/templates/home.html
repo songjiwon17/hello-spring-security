@@ -20,6 +20,10 @@
 <!-- Navbar -->
 <nav class="navbar navbar-expand-lg navbar-dark mb-4">
     <div class="container">
+        <div class="alert alert-success alert-dismissible fade show mt-3" role="alert" th:if="${successMessage}">
+            <strong th:text="${successMessage}"></strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
         <a class="navbar-brand" th:href="@{/home}">HanSung</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
             <span class="navbar-toggler-icon"></span>
