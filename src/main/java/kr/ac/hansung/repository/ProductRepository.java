@@ -5,10 +5,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
 public interface ProductRepository extends JpaRepository<Product, Long> {
     // 상품 개수 세기
     long countByStockEquals(int stock);
 
-    // 이름에 키워드가 포함된(Containing) 상품을 찾아 페이징 처리해 주는 메서드
-    Page<Product> findByNameContaining(String keyword, Pageable pageable);
+    // @Query를 이용한 명시적 LIKE 검색
+    @Query("SELECT p FROM Product p WHERE p.name LIKE %:keyword%")
+    Page<Product> findByNameContaining(@Param("keyword") String keyword, Pageable pageable);
 }

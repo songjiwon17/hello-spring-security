@@ -20,13 +20,15 @@ public class ProductService {
 
     private final ProductRepository productRepository;
 
-    // 페이징하기 위한 getProducts 메서드
+    // 전체 목록 페이징
     @Transactional(readOnly = true)
-    public Page<Product> getProducts(String keyword, Pageable pageable){
-        if (keyword == null || keyword.trim().isEmpty()) {
-            return productRepository.findAll(pageable);
-        }
-        // 검색어가 있으면 이름에 포함된 상품만 검색해서 반환
+    public Page<Product> getProducts(Pageable pageable){
+        return productRepository.findAll(pageable);
+    }
+
+    // 키워드 검색 + 페이징
+    @Transactional(readOnly = true)
+    public Page<Product> searchProducts(String keyword, Pageable pageable) {
         return productRepository.findByNameContaining(keyword, pageable);
     }
 

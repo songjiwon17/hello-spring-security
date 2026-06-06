@@ -6,9 +6,8 @@ import kr.ac.hansung.service.ProductService;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -25,15 +24,27 @@ public class ProductController {
     @GetMapping
     public String list(
             @RequestParam(required = false) String keyword,
-            @PageableDefault(size = 5, sort = "id", direction = Sort.Direction.ASC) Pageable pageable,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
             Model model) {
 
-        // 서비스에 keyword와 pageable을 함께 넘기기
-        Page<Product> productPage = productService.getProducts(keyword, pageable);
+        // URL 파라미터(page, size)로 페이지 요청 객체 생성, id 순 정렬 (오름차순)
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by("id"));
 
-        // 결과 모델에 담기
+        // 빈 문자열("")을 null로 정규화
+        String normalizedKeyword = (keyword != null && !keyword.isBlank()) ? keyword : null;
+
+        Page<Product> productPage;
+        if (normalizedKeyword != null) {
+            // 검색어가 있으면 키워드로 검색
+            productPage = productService.searchProducts(normalizedKeyword, pageRequest);
+        } else {
+            // 검색어가 없으면 전체 목록 조회
+            productPage = productService.getProducts(pageRequest);
+        }
+
         model.addAttribute("productPage", productPage);
-        model.addAttribute("keyword", keyword);
+        model.addAttribute("keyword", normalizedKeyword);
 
         return "products/list";
     }
