@@ -11,7 +11,11 @@ import org.springframework.data.domain.Sort;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import jakarta.validation.Valid;
 
 @Controller
 @RequestMapping("/products")
@@ -70,6 +74,44 @@ public class ProductController {
     @PostMapping("/{id}/delete")
     public String delete(@PathVariable Long id) {
         productService.deleteById(id);
+        return "redirect:/products";
+    }
+
+    // 상품 수정 폼
+    @GetMapping("/{id}/edit")
+    public String editProductForm(@PathVariable Long id, Model model) {
+        Product product = productService.findById(id);
+
+        // 기존 데이터를 DTO에 담아 폼에 pre-fill
+        ProductDto dto = new ProductDto();
+        dto.setName(product.getName());
+        dto.setPrice(product.getPrice());
+        dto.setStock(product.getStock());
+        dto.setDescription(product.getDescription());
+
+        model.addAttribute("productDto", dto);
+        model.addAttribute("productId", id);
+        return "products/edit";
+    }
+
+    // 수정한 데이터 저장
+    @PostMapping("/{id}/edit")
+    public String editProduct(@PathVariable Long id,
+                              @Valid @ModelAttribute("productDto") ProductDto productDto,
+                              BindingResult bindingResult,
+                              Model model,
+                              RedirectAttributes ra) {
+        // 만약 가격에 음수를 넣는 등 검증(Validation)을 통과하지 못하면 다시 수정 폼으로 돌려보냄
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("productId", id);
+            return "products/edit";
+        }
+
+        // 에러가 없으면 더티 체킹으로 업데이트 실행
+        productService.updateProduct(id, productDto);
+
+        // 1회성 알림 메시지를 담아서 목록으로 튕겨냄
+        ra.addFlashAttribute("successMessage", "상품이 성공적으로 수정되었습니다.");
         return "redirect:/products";
     }
 }

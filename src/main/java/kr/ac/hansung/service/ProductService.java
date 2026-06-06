@@ -55,4 +55,23 @@ public class ProductService {
     public void deleteById(Long id) {
         productRepository.deleteById(id);
     }
+
+    // 관리자 상품 수정 메서드
+    @Transactional
+    public Product updateProduct(Long id, ProductDto dto) {
+        // DB에서 기존 상품을 꺼내옴 (JPA가 이 상품을 감시)
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다: " + id));
+
+        // 값을 바꿔줌
+        product.setName(dto.getName());
+        product.setPrice(dto.getPrice());
+        product.setStock(dto.getStock());
+        if (dto.getDescription() != null) {
+            product.setDescription(dto.getDescription());
+        }
+
+        // UPDATE 쿼리를 날림
+        return product;
+    }
 }
